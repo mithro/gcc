@@ -38,8 +38,8 @@ does not support this the compiler will generate the equivalent using set and
 branch.
 
 mror
-Target RejectNegative
-For compatibility, we do not use the l.ror instruction yet.
+Target RejectNegative Mask(ROR)
+Allows generation of binaries which use the l.rori instructions.
 
 msext
 Target RejectNegative Mask(SEXT)
@@ -52,6 +52,11 @@ Target RejectNegative Mask(SFIMM)
 Allows generation of binaries which use l.sf*i instructions.  If your target
 does not support this the compiler will generate instructions to store the
 immediate to a register first.
+
+mshftimm
+Target RejectNegative Mask(SHFTIMM)
+Allows generation of binaries which support shifts and rotate instructions
+supporting immediate arguments, for example l.rori.
 
 msoft-div
 Target RejectNegative Mask(SOFT_DIV)

@@ -63,14 +63,16 @@
   "alu,st,ld,control,multi"
   (const_string "alu"))
 
-(define_attr "insn_support" "class1,sext,sfimm" (const_string "class1"))
+(define_attr "insn_support" "class1,sext,sfimm,shftimm" (const_string "class1"))
 
 (define_attr "enabled" ""
   (cond [(eq_attr "insn_support" "class1") (const_int 1)
 	 (and (eq_attr "insn_support" "sext")
 	      (ne (symbol_ref "TARGET_SEXT") (const_int 0))) (const_int 1)
 	 (and (eq_attr "insn_support" "sfimm")
-	      (ne (symbol_ref "TARGET_SFIMM") (const_int 0))) (const_int 1)]
+	      (ne (symbol_ref "TARGET_SFIMM") (const_int 0))) (const_int 1)
+	 (and (eq_attr "insn_support" "shftimm")
+	      (ne (symbol_ref "TARGET_SHFTIMM") (const_int 0))) (const_int 1)]
 	(const_int 0)))
 
 ;; Describe a user's asm statement.
@@ -157,11 +159,11 @@
 ;; Logical operators
 ;; -------------------------------------------------------------------------
 
-(define_code_iterator SHIFT  [ashift ashiftrt lshiftrt rotatert])
+(define_code_iterator SHIFT  [ashift ashiftrt lshiftrt])
 (define_code_attr shift_op   [(ashift "ashl") (ashiftrt "ashr")
-			      (lshiftrt "lshr") (rotatert "rotr")])
+			      (lshiftrt "lshr")])
 (define_code_attr shift_asm  [(ashift "sll") (ashiftrt "sra")
-			      (lshiftrt "srl") (rotatert "ror")])
+			      (lshiftrt "srl")])
 
 (define_insn "<shift_op>si3"
   [(set (match_operand:SI 0 "register_operand" "=r,r")
@@ -170,7 +172,18 @@
   ""
   "@
    l.<shift_asm>\t%0, %1, %2
-   l.<shift_asm>i\t%0, %1, %2")
+   l.<shift_asm>i\t%0, %1, %2"
+  [(set_attr "insn_support" "*,shftimm")])
+
+(define_insn "rotrsi3"
+  [(set (match_operand:SI 0 "register_operand" "=r,r")
+	(rotatert:SI (match_operand:SI 1 "register_operand"  "r,r")
+		  (match_operand:SI 2 "reg_or_u6_operand" "r,n")))]
+  "TARGET_ROR"
+  "@
+   l.ror\t%0, %1, %2
+   l.rori\t%0, %1, %2"
+  [(set_attr "insn_support" "*,shftimm")])
 
 (define_insn "andsi3"
   [(set (match_operand:SI 0 "register_operand" "=r,r")
